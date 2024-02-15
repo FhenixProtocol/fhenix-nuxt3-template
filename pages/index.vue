@@ -3,8 +3,9 @@
     <div>
       <img class="logo" :class="!dark ? 'light' : ''" src="~/assets/images/logo.png" />
     </div>
-    <button class="btn btn-success" @click="connect" :disabled="isItFhenixNetwork">{{ (isItFhenixNetwork) ? 'Connected to Fhenix' : 'Connect to Fhenix Network' }}</button>
-    <div>Balance: {{ isItFhenixNetwork ? balance : '---' }}</div>
+    <button class="btn btn-success" @click="fnxConnect" :disabled="isItFhenixNetwork">{{ (isItFhenixNetwork) ? 'Connected to Fhenix' : 'Connect to Fhenix Network' }}</button>
+    <div class="address"><b>Address:</b> {{ isItFhenixNetwork ? address : '---' }}</div>
+    <div><b>Balance:</b> {{ isItFhenixNetwork ? balance : '---' }}</div>
     <div v-if="isItFhenixNetwork">
       <NuxtLink to="/extra-page">Continue to page 2</NuxtLink>
     </div>
@@ -12,47 +13,22 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { onMounted } from 'vue';
 
-import ChainMixin, { provider } from '../mixins/ChainMixin';
-import CommonProps from '../mixins/CommonProps';
+const { dark, toggleTheme } = useThemeToggle();
+const { fnxConnect, isItFhenixNetwork, balance, address } = useChain();
 
-
-import EventBus from "../event-bus";
-
-import { defineComponent } from 'vue';
-import { FhenixClient } from "fhenixjs";
-import type { SupportedProvider } from "fhenixjs";
-
-import { useThemeToggle } from '../composables/useThemeToggle';
-
-export default defineComponent({
-  mixins: [ CommonProps, ChainMixin ],
-  setup() {
-    const { dark, toggleTheme } = useThemeToggle();
-    
-    return {
-      dark,
-      toggleTheme,
-    };
-  },
-  data() {
-    return { 
-      balance: "",
+onMounted(async () => {
+  if (localStorage.getItem("isConnected")) {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        await fnxConnect();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  },
-  mounted() {
-    var self = this;
-
-    EventBus.listenToEvent('network:connected', async (connected :boolean) => { 
-      console.log("network:connected", connected);
-      self.updateFHEClient(new FhenixClient({ provider: provider as SupportedProvider }));
-      self.balance = await self.getBalance(provider)
-    });
-  },
-  methods: {
   }
-
 });
 </script>
 

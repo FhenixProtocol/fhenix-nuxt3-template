@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  ssr: false,
   css: [
     '~/assets/style.scss',
   ],
@@ -10,7 +11,9 @@ export default defineNuxtConfig({
       mode: 'client'
     }
   ],
-
+  modules: [
+    '@pinia/nuxt',
+  ],
   runtimeConfig: {
     public: {
       NETWORK_CHAIN_ID: process.env.NUXT_ENV_NETWORK_CHAIN_ID || "412346",
